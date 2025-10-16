@@ -6,8 +6,8 @@
     <div class="controls">
         <p>b. 可新增、編輯、複製</p>
         <p>標準模組: <strong>SF系列定位及重複精度</strong></p>
-        <button class="btn-control" onclick="alert('新增模組功能')">新增模組</button>
-        <button class="btn-control" onclick="alert('複製模組功能')">複製模組</button>
+        <button class="btn-control" @onclick="AddModule">新增模組</button>
+        <button class="btn-control" @onclick="CopyModule">複製模組</button>
     </div>
 
     <h2>機型檢驗標準數值</h2>
@@ -59,7 +59,6 @@
         </div>
     }
 </div>
-
 <style>
     * {
         box-sizing: border-box;
