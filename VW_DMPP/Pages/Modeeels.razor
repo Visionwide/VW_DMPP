@@ -1,6 +1,10 @@
 ﻿@page "/modeeels"
+@inject IJSRuntime JSRuntime
 
 <PageTitle>機型檢驗標準數值 - SF-2112</PageTitle>
+
+<!-- ✨ 新增: 儲存提示 -->
+<div class="save-indicator" id="saveIndicator">✓ 已自動保存</div>
 
 <div class="container">
     <div class="controls">
@@ -10,6 +14,10 @@
             <button class="btn-control" @onclick="ShowCreateModal">新增模組</button>
             <button class="btn-control" @onclick="() => ShowCopyModalFromSelected()" disabled="@(!HasSelectedModel())">複製模組</button>
             <button class="btn-control" @onclick="() => ShowEditModalFromSelected()" disabled="@(!HasSelectedModel())">編輯模組</button>
+            
+            <!-- ✨ 新增: 匯出和清除按鈕 -->
+            <button class="btn-control btn-export" @onclick="ExportData">匯出資料</button>
+            <button class="btn-control btn-clear" @onclick="ClearAllData">清除記錄</button>
         </div>
 
         <div class="search-filter">
@@ -174,7 +182,6 @@
 }
 
 <style>
-    /* 保留原有的所有樣式 */
     * {
         box-sizing: border-box;
     }
@@ -195,9 +202,9 @@
         border-radius: 4px;
     }
 
-        .controls p {
-            margin: 5px 0;
-        }
+    .controls p {
+        margin: 5px 0;
+    }
 
     .action-buttons {
         margin: 10px 0;
@@ -216,12 +223,12 @@
         flex: 1;
     }
 
-        .search-box input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
+    .search-box input {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
 
     .model-selector {
         display: flex;
@@ -230,12 +237,12 @@
         flex: 1;
     }
 
-        .model-selector select {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
+    .model-selector select {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
 
     .btn-control, .btn-search, .btn-save, .btn-cancel, .btn-delete {
         padding: 8px 16px;
@@ -249,14 +256,14 @@
         transition: background-color 0.3s;
     }
 
-        .btn-control:hover, .btn-search:hover, .btn-save:hover {
-            background-color: #45a049;
-        }
+    .btn-control:hover, .btn-search:hover, .btn-save:hover {
+        background-color: #45a049;
+    }
 
-        .btn-control:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
+    .btn-control:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+    }
 
     .btn-search {
         margin-right: 0;
@@ -267,25 +274,25 @@
         color: #333;
     }
 
-        .btn-cancel:hover {
-            background-color: #e1e1e1;
-        }
+    .btn-cancel:hover {
+        background-color: #e1e1e1;
+    }
 
     .btn-delete {
         background-color: #f44336;
     }
 
-        .btn-delete:hover {
-            background-color: #d32f2f;
-        }
+    .btn-delete:hover {
+        background-color: #d32f2f;
+    }
 
     .btn-delete-action {
         background-color: #f44336;
     }
 
-        .btn-delete-action:hover {
-            background-color: #d32f2f;
-        }
+    .btn-delete-action:hover {
+        background-color: #d32f2f;
+    }
 
     .table-wrapper {
         overflow-x: auto;
@@ -299,26 +306,26 @@
         table-layout: auto;
     }
 
-        .inspection-table, .inspection-table th, .inspection-table td {
-            border: 1px solid #333;
-        }
+    .inspection-table, .inspection-table th, .inspection-table td {
+        border: 1px solid #333;
+    }
 
-            .inspection-table th, .inspection-table td {
-                padding: 10px;
-                text-align: center;
-                font-size: 14px;
-            }
+    .inspection-table th, .inspection-table td {
+        padding: 10px;
+        text-align: center;
+        font-size: 14px;
+    }
 
-            .inspection-table thead th {
-                background-color: #2c3e50;
-                color: white;
-                font-weight: bold;
-            }
+    .inspection-table thead th {
+        background-color: #2c3e50;
+        color: white;
+        font-weight: bold;
+    }
 
-            .inspection-table tbody td:first-child {
-                font-weight: bold;
-                background-color: #ecf0f1;
-            }
+    .inspection-table tbody td:first-child {
+        font-weight: bold;
+        background-color: #ecf0f1;
+    }
 
     .table-title {
         background-color: #d0d0d0;
@@ -337,19 +344,19 @@
         border: 1px solid #999;
     }
 
-        .table-title:hover {
-            background-color: #c0c0c0;
-        }
+    .table-title:hover {
+        background-color: #c0c0c0;
+    }
 
-        .table-title .arrow {
-            transition: transform 0.3s;
-            font-size: 14px;
-            color: #333;
-        }
+    .table-title .arrow {
+        transition: transform 0.3s;
+        font-size: 14px;
+        color: #333;
+    }
 
-        .table-title.collapsed .arrow {
-            transform: rotate(-90deg);
-        }
+    .table-title.collapsed .arrow {
+        transform: rotate(-90deg);
+    }
 
     .table-actions {
         display: flex;
@@ -367,9 +374,9 @@
         transition: background-color 0.3s;
     }
 
-        .btn-table-action:hover {
-            background-color: #2980b9;
-        }
+    .btn-table-action:hover {
+        background-color: #2980b9;
+    }
 
     .table-content {
         max-height: 1000px;
@@ -378,10 +385,10 @@
         opacity: 1;
     }
 
-        .table-content.collapsed {
-            max-height: 0;
-            opacity: 0;
-        }
+    .table-content.collapsed {
+        max-height: 0;
+        opacity: 0;
+    }
 
     h2 {
         color: #2c3e50;
@@ -399,7 +406,6 @@
         color: #666;
     }
 
-    /* Modal styles */
     .modal-backdrop {
         position: fixed;
         top: 0;
@@ -433,10 +439,10 @@
         border-bottom: 1px solid #ddd;
     }
 
-        .modal-header h3 {
-            margin: 0;
-            color: #2c3e50;
-        }
+    .modal-header h3 {
+        margin: 0;
+        color: #2c3e50;
+    }
 
     .btn-close {
         background: none;
@@ -462,22 +468,22 @@
         margin-bottom: 20px;
     }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
 
-        .form-group input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
+    .form-group input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
 
-            .form-group input.error {
-                border-color: #f44336;
-            }
+    .form-group input.error {
+        border-color: #f44336;
+    }
 
     .error-message {
         color: #f44336;
@@ -493,10 +499,10 @@
         border-radius: 4px;
     }
 
-        .axis-section h5 {
-            margin-top: 0;
-            color: #2c3e50;
-        }
+    .axis-section h5 {
+        margin-top: 0;
+        color: #2c3e50;
+    }
 
     .axis-values {
         display: grid;
@@ -508,18 +514,18 @@
         margin-bottom: 10px;
     }
 
-        .value-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 13px;
-        }
+    .value-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 13px;
+    }
 
-        .value-group input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
+    .value-group input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
 
     .confirm-dialog {
         position: fixed;
@@ -542,6 +548,42 @@
         gap: 15px;
     }
 
+    /* ✨ 新增: 儲存提示樣式 */
+    .save-indicator {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #28a745;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        opacity: 0;
+        transition: opacity 0.3s;
+        z-index: 2000;
+        font-weight: bold;
+    }
+
+    .save-indicator.show {
+        opacity: 1;
+    }
+
+    /* ✨ 新增: 匯出和清除按鈕樣式 */
+    .btn-export {
+        background-color: #17a2b8 !important;
+    }
+
+    .btn-export:hover {
+        background-color: #138496 !important;
+    }
+
+    .btn-clear {
+        background-color: #dc3545 !important;
+    }
+
+    .btn-clear:hover {
+        background-color: #c82333 !important;
+    }
 </style>
 
 @code {
@@ -554,13 +596,140 @@
     private string modalTitle = "";
     private string modelToDelete = "";
     private ModelData editingModel = new();
-    private string editMode = ""; // "create", "edit", "copy"
+    private string editMode = "";
     private bool modelNameError = false;
 
-    protected override void OnInitialized()
+    // ✨ 新增: LocalStorage 相關變數
+    private const string STORAGE_KEY = "modelData_SF2112";
+    private bool isDataLoaded = false;
+
+    protected override async Task OnInitializedAsync()
     {
-        InitializeModels();
+        // 先嘗試從 localStorage 載入
+        await LoadFromLocalStorage();
+        
+        // 如果沒有儲存的資料,使用預設資料
+        if (!isDataLoaded || models.Count == 0)
+        {
+            InitializeModels();
+        }
+        
         filteredModels = new List<ModelData>(models);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("console.log", "✓ 機型管理系統已載入");
+        }
+    }
+
+    // ✨ 新增: 載入資料
+    private async Task LoadFromLocalStorage()
+    {
+        try
+        {
+            var json = await JSRuntime.InvokeAsync<string>("localStorage.getItem", STORAGE_KEY);
+            
+            if (!string.IsNullOrEmpty(json))
+            {
+                var loadedModels = System.Text.Json.JsonSerializer.Deserialize<List<ModelData>>(json);
+                if (loadedModels != null && loadedModels.Count > 0)
+                {
+                    models = loadedModels;
+                    isDataLoaded = true;
+                    await JSRuntime.InvokeVoidAsync("console.log", "✓ 已載入先前的機型資料");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", $"載入資料失敗: {ex.Message}");
+        }
+    }
+
+    // ✨ 新增: 儲存資料
+    private async Task SaveToLocalStorage()
+    {
+        try
+        {
+            var json = System.Text.Json.JsonSerializer.Serialize(models);
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", STORAGE_KEY, json);
+            await JSRuntime.InvokeVoidAsync("console.log", "✓ 機型資料已自動保存");
+            
+            // 顯示儲存提示
+            await ShowSaveIndicator();
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", $"保存失敗: {ex.Message}");
+        }
+    }
+
+    // ✨ 新增: 顯示儲存提示
+    private async Task ShowSaveIndicator()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", @"
+            const indicator = document.getElementById('saveIndicator');
+            if (indicator) {
+                indicator.classList.add('show');
+                setTimeout(() => indicator.classList.remove('show'), 2000);
+            }
+        ");
+    }
+
+    // ✨ 新增: 清除所有資料
+    private async Task ClearAllData()
+    {
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "確定要清除所有機型資料嗎?此操作無法復原!");
+        
+        if (confirmed)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("localStorage.removeItem", STORAGE_KEY);
+                InitializeModels();
+                filteredModels = new List<ModelData>(models);
+                selectedModelId = "";
+                await JSRuntime.InvokeVoidAsync("alert", "✓ 所有資料已清除");
+            }
+            catch (Exception ex)
+            {
+                await JSRuntime.InvokeVoidAsync("console.error", $"清除失敗: {ex.Message}");
+            }
+        }
+    }
+
+    // ✨ 新增: 匯出資料
+    private async Task ExportData()
+    {
+        try
+        {
+            var json = System.Text.Json.JsonSerializer.Serialize(models, new System.Text.Json.JsonSerializerOptions 
+            { 
+                WriteIndented = true 
+            });
+            
+            var fileName = $"model_data_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+            
+            await JSRuntime.InvokeVoidAsync("eval", $@"
+                const dataStr = {System.Text.Json.JsonSerializer.Serialize(json)};
+                const dataBlob = new Blob([dataStr], {{ type: 'application/json' }});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = '{fileName}';
+                link.click();
+                URL.revokeObjectURL(url);
+            ");
+            
+            await JSRuntime.InvokeVoidAsync("console.log", "✓ 資料已匯出");
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("console.error", $"匯出失敗: {ex.Message}");
+        }
     }
 
     private void InitializeModels()
@@ -629,6 +798,7 @@
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
             filteredModels = new List<ModelData>(models);
+        
         }
         else
         {
@@ -730,7 +900,8 @@
         }
     }
 
-    private void SaveModel()
+    // ✨ 修改: 加入自動保存
+    private async Task SaveModel()
     {
         modelNameError = false;
 
@@ -753,6 +924,9 @@
             }
         }
 
+        // ✨ 新增: 自動保存到 localStorage
+        await SaveToLocalStorage();
+
         FilterModels();
         CloseModal();
     }
@@ -763,7 +937,8 @@
         showDeleteConfirm = true;
     }
 
-    private void DeleteModel()
+    // ✨ 修改: 加入自動保存
+    private async Task DeleteModel()
     {
         var model = models.FirstOrDefault(m => m.Id == modelToDelete);
         if (model != null)
@@ -775,6 +950,9 @@
             {
                 selectedModelId = "";
             }
+
+            // ✨ 新增: 自動保存到 localStorage
+            await SaveToLocalStorage();
 
             FilterModels();
         }
@@ -797,6 +975,7 @@
         modelNameError = false;
     }
 
+    // ✨ 資料類別定義
     public class ModelData
     {
         public string Id { get; set; } = "";
@@ -804,9 +983,9 @@
         public bool IsCollapsed { get; set; }
         public List<AxisData> Axes { get; set; } = new();
     }
+
     public class AxisData
     {
-
         public string Name { get; set; } = "";
         public string EncoderJIS { get; set; } = "";
         public string EncoderVDI { get; set; } = "";
