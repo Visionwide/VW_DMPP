@@ -318,35 +318,35 @@
                           <div id="geometry" class="tree-children expanded">
                               <div class="tree-item" onclick="showDetail('item1')" id="tree-item1">
                                   <span class="status-icon status-not-tested">--</span>
-                                  工作台面之真直度 - XY面向 <span style="color: #6c757d;">尚未檢驗</span>
+                                  <span class="tree-item-text">工作台面之真直度 - XY面向 <span style="color: #6c757d;">尚未檢驗</span></span>
                               </div>
                               <div class="tree-item" onclick="showDetail('item2')" id="tree-item2">
                                   <span class="status-icon status-not-tested">--</span>
-                                  工作台面之真直度 - YZ面向 <span style="color: #6c757d;">尚未檢驗</span>
+                                  <span class="tree-item-text">工作台面之真直度 - YZ面向 <span style="color: #6c757d;">尚未檢驗</span></span>
                               </div>
                               <div class="tree-item" onclick="showDetail('item3')" id="tree-item3">
                                   <span class="status-icon status-not-tested">--</span>
-                                  各軸方向相互運動之直角度 - XY面向 <span style="color: #6c757d;">尚未檢驗</span>
+                                  <span class="tree-item-text">各軸方向相互運動之直角度 - XY面向 <span style="color: #6c757d;">尚未檢驗</span></span>
                               </div>
                               <div class="tree-item" onclick="showDetail('item4')" id="tree-item4">
                                   <span class="status-icon status-not-tested">--</span>
-                                  各軸方向相互運動之直角度 - YZ面向 <span style="color: #6c757d;">尚未檢驗</span>
+                                  <span class="tree-item-text">各軸方向相互運動之直角度 - YZ面向 <span style="color: #6c757d;">尚未檢驗</span></span>
                               </div>
                               <div class="tree-item" onclick="showDetail('item5')" id="tree-item5">
                                   <span class="status-icon status-not-tested">--</span>
-                                  Y軸方向之運動與工作台面之平行度 <span style="color: #6c757d;">尚未檢驗</span>
+                                  <span class="tree-item-text">Y軸方向之運動與工作台面之平行度 <span style="color: #6c757d;">尚未檢驗</span></span>
                               </div>
                               <div class="tree-item" onclick="showDetail('item6')" id="tree-item6">
                                   <span class="status-icon status-not-tested">--</span>
-                                  工作台X軸方向之運動與主軸之平行度 <span style="color: #6c757d;">尚未檢驗</span>
+                                  <span class="tree-item-text">工作台X軸方向之運動與主軸之平行度 <span style="color: #6c757d;">尚未檢驗</span></span>
                               </div>
                               <div class="tree-item" onclick="showDetail('item7')" id="tree-item7">
                                   <span class="status-icon status-not-tested">--</span>
-                                  主軸軸線之軸向竄動 <span style="color: #6c757d;">尚未檢驗</span>
+                                  <span class="tree-item-text">主軸軸線之軸向竄動 <span style="color: #6c757d;">尚未檢驗</span></span>
                               </div>
                               <div class="tree-item" onclick="showDetail('item8')" id="tree-item8">
                                   <span class="status-icon status-not-tested">--</span>
-                                  主軸軸線之徑向竄動 <span style="color: #6c757d;">尚未檢驗</span>
+                                  <span class="tree-item-text">主軸軸線之徑向竄動 <span style="color: #6c757d;">尚未檢驗</span></span>
                               </div>
                           </div>
                       </div>
@@ -561,23 +561,43 @@
       }
   }
 
+  // ✨ 修正: 更新側邊欄項目 (保留 onclick 事件)
   function updateTreeItem(itemId) {
       const data = inspectionData[itemId];
       const treeItem = document.getElementById(`tree-${itemId}`);
       if (!treeItem) return;
 
-      let statusIcon = '', statusText = '';
+      // 找到 tree-item-text span
+      const textSpan = treeItem.querySelector('.tree-item-text');
+      if (!textSpan) return;
+
+      let statusText = '';
       if (data.status === 'pass') {
-          statusIcon = '<span class="status-icon status-pass">✓</span>';
-          statusText = '<span style="color: #28a745; font-weight: bold;">檢驗合格</span>';
+          // 更新狀態圖示
+          const statusIcon = treeItem.querySelector('.status-icon');
+          if (statusIcon) {
+              statusIcon.className = 'status-icon status-pass';
+              statusIcon.textContent = '✓';
+          }
+          statusText = `${data.title} <span style="color: #28a745; font-weight: bold;">檢驗合格</span>`;
       } else if (data.status === 'fail') {
-          statusIcon = '<span class="status-icon status-fail">✗</span>';
-          statusText = '<span style="color: #dc3545; font-weight: bold;">檢驗不合格</span>';
+          const statusIcon = treeItem.querySelector('.status-icon');
+          if (statusIcon) {
+              statusIcon.className = 'status-icon status-fail';
+              statusIcon.textContent = '✗';
+          }
+          statusText = `${data.title} <span style="color: #dc3545; font-weight: bold;">檢驗不合格</span>`;
       } else {
-          statusIcon = '<span class="status-icon status-not-tested">--</span>';
-          statusText = '<span style="color: #6c757d;">尚未檢驗</span>';
+          const statusIcon = treeItem.querySelector('.status-icon');
+          if (statusIcon) {
+              statusIcon.className = 'status-icon status-not-tested';
+              statusIcon.textContent = '--';
+          }
+          statusText = `${data.title} <span style="color: #6c757d;">尚未檢驗</span>`;
       }
-      treeItem.innerHTML = `${statusIcon} ${data.title} ${statusText}`;
+
+      // 只更新文字內容,不影響 onclick
+      textSpan.innerHTML = statusText;
   }
 
   function updateAllTreeItems() {
@@ -658,157 +678,179 @@
           </div>
       `;
   }
+        function setStatus(itemId, status) {
+          // 檢查是否已選擇人員
+          const data = inspectionData[itemId];
 
-    function setStatus(itemId, status) {
-        // 檢查是否已選擇人員
-        const data = inspectionData[itemId];
+          // 驗證製程擔當
+          if (!data.personnel.process || data.personnel.process === '待指派') {
+              alert('⚠️ 請先選擇【製程擔當】人員!');
+              return;
+          }
 
-        // 驗證製程擔當
-        if (!data.personnel.process || data.personnel.process === '待指派') {
-            alert('⚠️ 請先選擇【製程擔當】人員!');
-            return;
-        }
+          // 驗證終檢擔當
+          if (!data.personnel.final || data.personnel.final === '待指派') {
+              alert('⚠️ 請先選擇【終檢擔當】人員!');
+              return;
+          }
 
-        // 驗證終檢擔當
-        if (!data.personnel.final || data.personnel.final === '待指派') {
-            alert('⚠️ 請先選擇【終檢擔當】人員!');
-            return;
-        }
+          // 人員都已選擇,繼續執行檢驗
+          const resultText = prompt(`請輸入檢驗結果:`);
 
-        // 人員都已選擇,繼續執行檢驗
-        const resultText = prompt(`請輸入檢驗結果:`);
+          if (resultText !== null && resultText.trim() !== '') {
+              // 更新數據
+              inspectionData[itemId].status = status;
+              inspectionData[itemId].result = resultText;
 
-        if (resultText !== null && resultText.trim() !== '') {
-            // 更新數據
-            inspectionData[itemId].status = status;
-            inspectionData[itemId].result = resultText;
+              // 保存到 localStorage
+              saveToLocalStorage();
 
-            // 保存到 localStorage
-            saveToLocalStorage();
+              // 更新側邊欄顯示
+              updateTreeItem(itemId);
 
-            // 更新側邊欄顯示
-            updateTreeItem(itemId);
+              // 更新完成率
+              updateProgressDisplay();
 
-            // 更新完成率
-            updateProgressDisplay();
+              // 重新顯示詳細資料
+              showDetail(itemId);
 
-            // 重新顯示詳細資料
-            showDetail(itemId);
+              // 顯示提示
+              alert(status === 'pass' ? '✓ 檢驗結果已記錄為合格' : '✗ 檢驗結果已記錄為不合格');
 
-            // 顯示提示
-            alert(status === 'pass' ? '✓ 檢驗結果已記錄為合格' : '✗ 檢驗結果已記錄為不合格');
+              console.log(`✓ ${itemId} 狀態已更新為: ${status}`);
+          } else if (resultText !== null) {
+              alert('⚠️ 請輸入檢驗結果數據!');
+          }
+      }
 
-            console.log(`✓ ${itemId} 狀態已更新為: ${status}`);
-        } else if (resultText !== null) {
-            alert('⚠️ 請輸入檢驗結果數據!');
-        }
-    }
+      function updatePersonnel(itemId, type, value) {
+          inspectionData[itemId].personnel[type] = value;
+          saveToLocalStorage();
+          console.log(`✓ ${itemId} 的 ${type === 'process' ? '製程擔當' : '終檢擔當'} 已更新為: ${value}`);
+      }
 
+      // ✨ 修正: 頁面載入時初始化 (確保 Blazor 渲染完成後執行)
+      function initializeInspectionSystem() {
+          console.log('🚀 系統初始化中...');
 
-  function updatePersonnel(itemId, type, value) {
-      inspectionData[itemId].personnel[type] = value;
-      saveToLocalStorage();
-        console.log(`✓ ${itemId} 的 ${type === 'process' ? '製程擔當' : '終檢擔當'} 已更新為: ${value}`);
-    }
+          // 嘗試從 localStorage 載入數據
+          const loaded = loadFromLocalStorage();
 
-    // 頁面載入時初始化
-    window.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 系統初始化中...');
+          if (loaded) {
+              console.log('✓ 已載入先前的檢驗記錄');
+          } else {
+              console.log('ℹ️ 無先前記錄,使用初始數據');
+          }
 
-        // 嘗試從 localStorage 載入數據
-        const loaded = loadFromLocalStorage();
+          // 顯示歡迎訊息
+          console.log('✓ 品檢系統已就緒');
+          console.log('📋 共有 8 個檢驗項目');
 
-        if (loaded) {
-            console.log('✓ 已載入先前的檢驗記錄');
-        } else {
-            console.log('ℹ️ 無先前記錄,使用初始數據');
-        }
+          // 顯示快捷鍵提示
+          console.log('💡 提示: 所有操作會自動保存到瀏覽器');
+      }
 
-        // 顯示歡迎訊息
-        console.log('✓ 品檢系統已就緒');
-        console.log('📋 共有 8 個檢驗項目');
+      // ✨ 修正: 使用多種方式確保初始化執行
+      if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initializeInspectionSystem);
+      } else {
+          // DOM 已經載入完成
+          initializeInspectionSystem();
+      }
 
-        // 顯示快捷鍵提示
-        console.log('💡 提示: 所有操作會自動保存到瀏覽器');
-    });
+      // 額外保險: 延遲執行一次
+      setTimeout(initializeInspectionSystem, 100);
 
-    // 監聽頁面關閉前事件
-    window.addEventListener('beforeunload', function(e) {
-        // 確保數據已保存
-        saveToLocalStorage();
-    });
+      // 監聽頁面關閉前事件
+      window.addEventListener('beforeunload', function(e) {
+          // 確保數據已保存
+          saveToLocalStorage();
+      });
 
-    // 定期自動保存 (每30秒)
-    setInterval(function() {
-        const progress = calculateProgress();
-        if (progress.completed > 0) {
-            saveToLocalStorage();
-            console.log(`⏰ 自動保存 - 已完成 ${progress.completed}/${progress.total} 項`);
-        }
-    }, 30000);
+      // ✨ 修正: 定期自動保存 (每30秒)
+      setInterval(function() {
+          const progress = calculateProgress();
+          if (progress.completed > 0) {
+              saveToLocalStorage();
+              console.log(`⏰ 自動保存 - 已完成 ${progress.completed}/${progress.total} 項`);
+          }
+      }, 30000);
 
-    // 鍵盤快捷鍵支援
-    document.addEventListener('keydown', function(e) {
-        // Ctrl+S 手動保存
-        if (e.ctrlKey && e.key === 's') {
-            e.preventDefault();
-            saveToLocalStorage();
-            alert('✓ 數據已手動保存');
-        }
+      // 鍵盤快捷鍵支援
+      document.addEventListener('keydown', function(e) {
+          // Ctrl+S 手動保存
+          if (e.ctrlKey && e.key === 's') {
+              e.preventDefault();
+              saveToLocalStorage();
+              alert('✓ 數據已手動保存');
+          }
 
-        // Ctrl+E 匯出數據
-        if (e.ctrlKey && e.key === 'e') {
-            e.preventDefault();
-            exportData();
-        }
-    });
+          // Ctrl+E 匯出數據
+          if (e.ctrlKey && e.key === 'e') {
+              e.preventDefault();
+              exportData();
+          }
+      });
 
-    // 輔助函數: 格式化日期時間
-    function formatDateTime(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day} ${hours}:${minutes}`;
-    }
+      // 輔助函數: 格式化日期時間
+      function formatDateTime(date) {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          const hours = String(date.getHours()).padStart(2, '0');
+          const minutes = String(date.getMinutes()).padStart(2, '0');
+          return `${year}-${month}-${day} ${hours}:${minutes}`;
+      }
 
-    // 輔助函數: 生成檢驗報告摘要
-    function generateReportSummary() {
-        const progress = calculateProgress();
-        const passItems = Object.values(inspectionData).filter(item => item.status === 'pass');
-        const failItems = Object.values(inspectionData).filter(item => item.status === 'fail');
+      // 輔助函數: 生成檢驗報告摘要
+      function generateReportSummary() {
+          const progress = calculateProgress();
+          const passItems = Object.values(inspectionData).filter(item => item.status === 'pass');
+          const failItems = Object.values(inspectionData).filter(item => item.status === 'fail');
 
-        return {
-            total: progress.total,
-            completed: progress.completed,
-            pass: passItems.length,
-            fail: failItems.length,
-            percentage: progress.percentage,
-            timestamp: formatDateTime(new Date())
-        };
-    }
+          return {
+              total: progress.total,
+              completed: progress.completed,
+              pass: passItems.length,
+              fail: failItems.length,
+              percentage: progress.percentage,
+              timestamp: formatDateTime(new Date())
+          };
+      }
 
-    // 控制台輸出函數 (供開發者使用)
-    window.inspectionDebug = {
-        showData: () => console.table(inspectionData),
-        showProgress: () => console.log(calculateProgress()),
-        showSummary: () => console.log(generateReportSummary()),
-        resetAll: () => clearSavedData(),
-        exportJSON: () => exportData()
-    };
+      // 控制台輸出函數 (供開發者使用)
+      window.inspectionDebug = {
+          showData: () => console.table(inspectionData),
+          showProgress: () => console.log(calculateProgress()),
+          showSummary: () => console.log(generateReportSummary()),
+          resetAll: () => clearSavedData(),
+          exportJSON: () => exportData(),
+          forceReload: () => {
+              loadFromLocalStorage();
+              updateProgressDisplay();
+              updateAllTreeItems();
+              console.log('✓ 已強制重新載入數據');
+          }
+      };
 
-    console.log('💻 開發者工具已載入: 在控制台輸入 inspectionDebug 查看可用命令');
+      console.log('💻 開發者工具已載入: 在控制台輸入 inspectionDebug 查看可用命令');
 </script>
 
 @code {
-    // Blazor C# 代碼區域 (如需要可在此添加後端邏輯)
+    // Blazor C# 代碼區域
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await JSRuntime.InvokeVoidAsync("console.log", "✓ 機型管理系統已載入");
+            // 確保 JavaScript 初始化完成
+            await Task.Delay(200);
+
+
+            // 呼叫 JavaScript 初始化函數
+            await JSRuntime.InvokeVoidAsync("eval", "if(typeof initializeInspectionSystem === 'function') initializeInspectionSystem();");
+
+            await JSRuntime.InvokeVoidAsync("console.log", "✓ 品檢系統 Blazor 組件已載入");
         }
     }
 }
