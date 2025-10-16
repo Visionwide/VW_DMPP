@@ -66,3 +66,44 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+/* 設定頂部導覽列的顏色 */
+.top-row {
+    background-color: #ff8c00 !important; /* 深橘色 (Dark Orange) */
+    color: white; /* 確保 "VisionWide" 文字為白色 */
+}
+
+    /* 確保頂部導覽列中的連結文字和圖片旁的文字也是白色 */
+    .top-row .navbar-brand {
+        color: white;
+    }
+/* 設定整個側邊欄的背景顏色 */
+.sidebar {
+    background-color: #ff9000; /* 亮橘色 (Orange) */
+}
+
+/* 設定整個側邊欄的背景顏色 */
+.sidebar {
+    background-color: #ff9000; /* 亮橘色 (Orange) */
+}
+
+    /* 設定側邊欄 NavLink 的文字顏色 */
+    .sidebar .nav-link {
+        color: white; /* 連結文字顏色：白色 */
+    }
+
+        /* 設定懸停（Hover）效果 */
+        .sidebar .nav-link:hover {
+            background-color: #ff6347; /* 懸停時的背景色：番茄紅 (Tomato)，提供對比 */
+            color: white;
+        }
+
+        /* 設定啟用中（Active）的 NavLink 樣式 */
+        .sidebar .nav-link.active {
+            background-color: #cc5500; /* 啟用時的背景色：較深的橘色 */
+            color: #fff0d6; /* 啟用時的文字顏色：略帶米色的白，提供強調 */
+        }
+
+    /* 確保圖示的顏色與文字顏色一致 */
+    .sidebar .nav-item span {
+        color: inherit; /* 繼承父元素的白色 */
+    }
