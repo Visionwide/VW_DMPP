@@ -846,6 +846,7 @@
             // 確保 JavaScript 初始化完成
             await Task.Delay(200);
 
+
             // 呼叫 JavaScript 初始化函數
             await JSRuntime.InvokeVoidAsync("eval", "if(typeof initializeInspectionSystem === 'function') initializeInspectionSystem();");
 
