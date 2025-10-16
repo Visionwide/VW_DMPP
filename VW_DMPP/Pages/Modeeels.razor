@@ -6,60 +6,175 @@
     <div class="controls">
         <p>b. 可新增、編輯、複製</p>
         <p>標準模組: <strong>SF系列定位及重複精度</strong></p>
-        <button class="btn-control" @onclick="AddModule">新增模組</button>
-        <button class="btn-control" @onclick="CopyModule">複製模組</button>
+        <div class="action-buttons">
+            <button class="btn-control" @onclick="ShowCreateModal">新增模組</button>
+            <button class="btn-control" @onclick="() => ShowCopyModalFromSelected()" disabled="@(!HasSelectedModel())">複製模組</button>
+            <button class="btn-control" @onclick="() => ShowEditModalFromSelected()" disabled="@(!HasSelectedModel())">編輯模組</button>
+        </div>
+
+        <div class="search-filter">
+            <div class="search-box">
+                <input type="text" placeholder="搜尋機型..." @bind="searchTerm" @bind:event="oninput" @onkeyup="@(e => { if (e.Key == "Enter") FilterModels(); })" />
+                <button class="btn-search" @onclick="FilterModels">搜尋</button>
+            </div>
+
+            <div class="model-selector">
+                <label for="modelSelect">選擇機型：</label>
+                <select id="modelSelect" @bind="selectedModelId" @bind:event="onchange">
+                    <option value="">-- 請選擇機型 --</option>
+                    @foreach (var model in models)
+                    {
+                        <option value="@model.Id">@model.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
     </div>
 
     <h2>機型檢驗標準數值</h2>
 
-    @foreach (var model in models)
+    @if (filteredModels.Count == 0)
     {
-        <div class="table-title @(model.IsCollapsed ? "collapsed" : "")" @onclick="() => ToggleTable(model.Id)">
-            <span class="arrow">▼</span>
-            <span>機型: <strong>@model.Name</strong></span>
-        </div>
-        <div class="table-content @(model.IsCollapsed ? "collapsed" : "")">
-            <div class="table-wrapper">
-                <table class="inspection-table">
-                    <thead>
-                        <tr>
-                            <th rowspan="2" style="width: 8%;">軸向</th>
-                            <th colspan="4">編碼器</th>
-                            <th colspan="4">光學尺</th>
-                        </tr>
-                        <tr>
-                            <th>JIS-B6333<br>定位精度mm</th>
-                            <th>VDI 3441<br>定位精度mm</th>
-                            <th>JIS-B6333<br>重複精度mm</th>
-                            <th>VDI 3441<br>重複精度mm</th>
-                            <th>JIS-B6333<br>定位精度mm</th>
-                            <th>VDI 3441<br>定位精度mm</th>
-                            <th>JIS-B6333<br>重複精度mm</th>
-                            <th>VDI 3441<br>重複精度mm</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var axis in model.Axes)
-                        {
-                            <tr>
-                                <td>@axis.Name</td>
-                                <td>@axis.EncoderJIS</td>
-                                <td>@axis.EncoderVDI</td>
-                                <td>@axis.EncoderJISRepeat</td>
-                                <td>@axis.EncoderVDIRepeat</td>
-                                <td>@axis.OpticalJIS</td>
-                                <td>@axis.OpticalVDI</td>
-                                <td>@axis.OpticalJISRepeat</td>
-                                <td>@axis.OpticalVDIRepeat</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+        <div class="no-results">沒有找到符合條件的機型</div>
+    }
+    else
+    {
+        @foreach (var model in filteredModels)
+        {
+            <div class="table-title @(model.IsCollapsed ? "collapsed" : "")" @onclick="() => ToggleTable(model.Id)">
+                <span class="arrow">▼</span>
+                <span>機型: <strong>@model.Name</strong></span>
+                <div class="table-actions" @onclick:stopPropagation="true">
+                    <button class="btn-table-action" @onclick="() => ShowEditModal(model.Id)">編輯</button>
+                    <button class="btn-table-action" @onclick="() => ShowCopyModal(model.Id)">複製</button>
+                    <button class="btn-table-action btn-delete-action" @onclick="() => ConfirmDeleteModel(model.Id)">刪除</button>
+                </div>
             </div>
-        </div>
+            <div class="table-content @(model.IsCollapsed ? "collapsed" : "")">
+                <div class="table-wrapper">
+                    <table class="inspection-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="width: 8%;">軸向</th>
+                                <th colspan="4">編碼器</th>
+                                <th colspan="4">光學尺</th>
+                            </tr>
+                            <tr>
+                                <th>JIS-B6333<br>定位精度mm</th>
+                                <th>VDI 3441<br>定位精度mm</th>
+                                <th>JIS-B6333<br>重複精度mm</th>
+                                <th>VDI 3441<br>重複精度mm</th>
+                                <th>JIS-B6333<br>定位精度mm</th>
+                                <th>VDI 3441<br>定位精度mm</th>
+                                <th>JIS-B6333<br>重複精度mm</th>
+                                <th>VDI 3441<br>重複精度mm</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var axis in model.Axes)
+                            {
+                                <tr>
+                                    <td>@axis.Name</td>
+                                    <td>@axis.EncoderJIS</td>
+                                    <td>@axis.EncoderVDI</td>
+                                    <td>@axis.EncoderJISRepeat</td>
+                                    <td>@axis.EncoderVDIRepeat</td>
+                                    <td>@axis.OpticalJIS</td>
+                                    <td>@axis.OpticalVDI</td>
+                                    <td>@axis.OpticalJISRepeat</td>
+                                    <td>@axis.OpticalVDIRepeat</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
     }
 </div>
+
+@if (showModal)
+{
+    <div class="modal-backdrop" @onclick="CloseModal"></div>
+    <div class="modal-container" @onclick:stopPropagation="true">
+        <div class="modal-header">
+            <h3>@modalTitle</h3>
+            <button class="btn-close" @onclick="CloseModal">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="modelName">機型名稱:</label>
+                <input type="text" id="modelName" @bind="editingModel.Name" class="@(modelNameError ? "error" : "")" />
+                @if (modelNameError)
+                {
+                    <span class="error-message">請輸入機型名稱</span>
+                }
+            </div>
+
+            <h4>軸向設定</h4>
+            @foreach (var axis in editingModel.Axes)
+            {
+                <div class="axis-section">
+                    <h5>@axis.Name 軸</h5>
+                    <div class="axis-values">
+                        <div class="value-group">
+                            <label>編碼器 JIS-B6333 定位精度:</label>
+                            <input type="text" @bind="axis.EncoderJIS" />
+                        </div>
+                        <div class="value-group">
+                            <label>編碼器 VDI 3441 定位精度:</label>
+                            <input type="text" @bind="axis.EncoderVDI" />
+                        </div>
+                        <div class="value-group">
+                            <label>編碼器 JIS-B6333 重複精度:</label>
+                            <input type="text" @bind="axis.EncoderJISRepeat" />
+                        </div>
+                        <div class="value-group">
+                            <label>編碼器 VDI 3441 重複精度:</label>
+                            <input type="text" @bind="axis.EncoderVDIRepeat" />
+                        </div>
+                        <div class="value-group">
+                            <label>光學尺 JIS-B6333 定位精度:</label>
+                            <input type="text" @bind="axis.OpticalJIS" />
+                        </div>
+                        <div class="value-group">
+                            <label>光學尺 VDI 3441 定位精度:</label>
+                            <input type="text" @bind="axis.OpticalVDI" />
+                        </div>
+                        <div class="value-group">
+                            <label>光學尺 JIS-B6333 重複精度:</label>
+                            <input type="text" @bind="axis.OpticalJISRepeat" />
+                        </div>
+                        <div class="value-group">
+                            <label>光學尺 VDI 3441 重複精度:</label>
+                            <input type="text" @bind="axis.OpticalVDIRepeat" />
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" @onclick="CloseModal">取消</button>
+            <button class="btn-save" @onclick="SaveModel">儲存</button>
+        </div>
+    </div>
+}
+
+@if (showDeleteConfirm)
+{
+    <div class="modal-backdrop" @onclick="CancelDelete"></div>
+    <div class="confirm-dialog" @onclick:stopPropagation="true">
+        <h3>確認刪除</h3>
+        <p>確定要刪除機型 "@(models.FirstOrDefault(m => m.Id == modelToDelete)?.Name)" 嗎？</p>
+        <div class="confirm-buttons">
+            <button class="btn-cancel" @onclick="CancelDelete">取消</button>
+            <button class="btn-delete" @onclick="DeleteModel">刪除</button>
+        </div>
+    </div>
+}
+
 <style>
+    /* 保留原有的所有樣式 */
     * {
         box-sizing: border-box;
     }
@@ -84,7 +199,45 @@
             margin: 5px 0;
         }
 
-    .btn-control {
+    .action-buttons {
+        margin: 10px 0;
+    }
+
+    .search-filter {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+        gap: 20px;
+    }
+
+    .search-box {
+        display: flex;
+        gap: 10px;
+        flex: 1;
+    }
+
+        .search-box input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+    .model-selector {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex: 1;
+    }
+
+        .model-selector select {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+    .btn-control, .btn-search, .btn-save, .btn-cancel, .btn-delete {
         padding: 8px 16px;
         margin-right: 10px;
         background-color: #4CAF50;
@@ -96,8 +249,42 @@
         transition: background-color 0.3s;
     }
 
-        .btn-control:hover {
+        .btn-control:hover, .btn-search:hover, .btn-save:hover {
             background-color: #45a049;
+        }
+
+        .btn-control:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+    .btn-search {
+        margin-right: 0;
+    }
+
+    .btn-cancel {
+        background-color: #f1f1f1;
+        color: #333;
+    }
+
+        .btn-cancel:hover {
+            background-color: #e1e1e1;
+        }
+
+    .btn-delete {
+        background-color: #f44336;
+    }
+
+        .btn-delete:hover {
+            background-color: #d32f2f;
+        }
+
+    .btn-delete-action {
+        background-color: #f44336;
+    }
+
+        .btn-delete-action:hover {
+            background-color: #d32f2f;
         }
 
     .table-wrapper {
@@ -143,7 +330,7 @@
         cursor: pointer;
         user-select: none;
         display: flex;
-        justify-content: flex-start;
+        justify-content: space-between;
         align-items: center;
         gap: 10px;
         transition: background-color 0.3s;
@@ -164,6 +351,26 @@
             transform: rotate(-90deg);
         }
 
+    .table-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-table-action {
+        padding: 5px 10px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: background-color 0.3s;
+    }
+
+        .btn-table-action:hover {
+            background-color: #2980b9;
+        }
+
     .table-content {
         max-height: 1000px;
         overflow: hidden;
@@ -182,29 +389,178 @@
         padding-bottom: 10px;
     }
 
-    @@media (max-width: 768px) {
-        .container {
-            padding: 10px;
-        }
-
-        .inspection-table th, .inspection-table td {
-            padding: 6px;
-            font-size: 12px;
-        }
-
-        .btn-control {
-            padding: 6px 12px;
-            font-size: 12px;
-        }
+    .no-results {
+        padding: 20px;
+        text-align: center;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+        margin: 20px 0;
+        font-style: italic;
+        color: #666;
     }
+
+    /* Modal styles */
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+    }
+
+    .modal-container {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        background-color: white;
+        border-radius: 8px;
+        z-index: 1001;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid #ddd;
+    }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        padding: 15px 20px;
+        border-top: 1px solid #ddd;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+            .form-group input.error {
+                border-color: #f44336;
+            }
+
+    .error-message {
+        color: #f44336;
+        font-size: 12px;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .axis-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+    }
+
+        .axis-section h5 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+    .axis-values {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .value-group {
+        margin-bottom: 10px;
+    }
+
+        .value-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+
+        .value-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+    .confirm-dialog {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+        background-color: white;
+        border-radius: 8px;
+        z-index: 1001;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        text-align: center;
+    }
+
+    .confirm-buttons {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+
 </style>
 
 @code {
     private List<ModelData> models = new();
+    private List<ModelData> filteredModels = new();
+    private string searchTerm = "";
+    private string? selectedModelId;
+    private bool showModal = false;
+    private bool showDeleteConfirm = false;
+    private string modalTitle = "";
+    private string modelToDelete = "";
+    private ModelData editingModel = new();
+    private string editMode = ""; // "create", "edit", "copy"
+    private bool modelNameError = false;
 
     protected override void OnInitialized()
     {
         InitializeModels();
+        filteredModels = new List<ModelData>(models);
     }
 
     private void InitializeModels()
@@ -218,63 +574,227 @@
                 IsCollapsed = false,
                 Axes = new List<AxisData>
                 {
-                    new AxisData { Name = "X", EncoderJIS = "±0.010/全行程", EncoderVDI = "P 0.015", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.010", OpticalJIS = "±0.008/全行程", OpticalVDI = "P 0.010", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.008" }
+                    new AxisData { Name = "X", EncoderJIS = "±0.010/全行程", EncoderVDI = "P 0.015", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.010", OpticalJIS = "±0.008/全行程", OpticalVDI = "P 0.010", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.008" },
+                    new AxisData { Name = "Y", EncoderJIS = "±0.010/全行程", EncoderVDI = "P 0.018", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.015", OpticalJIS = "±0.008/全行程", OpticalVDI = "P 0.016", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.012" },
+                    new AxisData { Name = "Z", EncoderJIS = "±0.010/全行程", EncoderVDI = "P 0.012", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.010", OpticalJIS = "±0.008/全行程", OpticalVDI = "P 0.010", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.008" }
+                }
+            },
+            new ModelData
+            {
+                Id = "sf3020",
+                Name = "SF-3020",
+                IsCollapsed = true,
+                Axes = new List<AxisData>
+                {
+                    new AxisData { Name = "X", EncoderJIS = "±0.012/全行程", EncoderVDI = "P 0.020", EncoderJISRepeat = "±0.004", EncoderVDIRepeat = "PS 0.012", OpticalJIS = "±0.010/全行程", OpticalVDI = "P 0.015", OpticalJISRepeat = "±0.003", OpticalVDIRepeat = "PS 0.010" },
+                    new AxisData { Name = "Y", EncoderJIS = "±0.012/全行程", EncoderVDI = "P 0.022", EncoderJISRepeat = "±0.004", EncoderVDIRepeat = "PS 0.018", OpticalJIS = "±0.010/全行程", OpticalVDI = "P 0.018", OpticalJISRepeat = "±0.003", OpticalVDIRepeat = "PS 0.015" },
+                    new AxisData { Name = "Z", EncoderJIS = "±0.012/全行程", EncoderVDI = "P 0.015", EncoderJISRepeat = "±0.004", EncoderVDIRepeat = "PS 0.012", OpticalJIS = "±0.010/全行程", OpticalVDI = "P 0.012", OpticalJISRepeat = "±0.003", OpticalVDIRepeat = "PS 0.010" }
                 }
             }
         };
     }
 
-    private void AddModule()
+    private bool HasSelectedModel()
     {
-        var newModel = new ModelData
-        {
-            Id = $"sf{models.Count + 1}000",
-            Name = $"SF-{models.Count + 1}000",
-            IsCollapsed = true,
-            Axes = new List<AxisData>
-            {
-                new AxisData { Name = "X", EncoderJIS = "±0.010/全行程", EncoderVDI = "P 0.015", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.010", OpticalJIS = "±0.008/全行程", OpticalVDI = "P 0.010", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.008" }
-            }
-        };
-
-        models.Add(newModel);
+        return !string.IsNullOrEmpty(selectedModelId) && models.Any(m => m.Id == selectedModelId);
     }
 
-    private void CopyModule()
+    private void ShowEditModalFromSelected()
     {
-        if (models.Any())
+        if (!string.IsNullOrEmpty(selectedModelId))
         {
-            var lastModel = models.Last();
-            var copiedModel = new ModelData
-            {
-                Id = $"{lastModel.Id}-copy",
-                Name = $"{lastModel.Name} - 複製",
-                IsCollapsed = true,
-                Axes = lastModel.Axes.Select(axis => new AxisData
-                {
-                    Name = axis.Name,
-                    EncoderJIS = axis.EncoderJIS,
-                    EncoderVDI = axis.EncoderVDI,
-                    EncoderJISRepeat = axis.EncoderJISRepeat,
-                    EncoderVDIRepeat = axis.EncoderVDIRepeat,
-                    OpticalJIS = axis.OpticalJIS,
-                    OpticalVDI = axis.OpticalVDI,
-                    OpticalJISRepeat = axis.OpticalJISRepeat,
-                    OpticalVDIRepeat = axis.OpticalVDIRepeat
-                }).ToList()
-            };
+            ShowEditModal(selectedModelId);
+        }
+    }
 
-            models.Add(copiedModel);
+    private void ShowCopyModalFromSelected()
+    {
+        if (!string.IsNullOrEmpty(selectedModelId))
+        {
+            ShowCopyModal(selectedModelId);
         }
     }
 
     private void ToggleTable(string modelId)
     {
-        var model = models.FirstOrDefault(m => m.Id == modelId);
+        var model = filteredModels.FirstOrDefault(m => m.Id == modelId);
         if (model != null)
         {
             model.IsCollapsed = !model.IsCollapsed;
         }
+    }
+
+    private void FilterModels()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredModels = new List<ModelData>(models);
+        }
+        else
+        {
+            filteredModels = models
+                .Where(m => m.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    private void ShowCreateModal()
+    {
+        editMode = "create";
+        modalTitle = "新增機型";
+        modelNameError = false;
+
+        editingModel = new ModelData
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = "",
+            IsCollapsed = false,
+            Axes = new List<AxisData>
+            {
+                new AxisData { Name = "X" },
+                new AxisData { Name = "Y" },
+                new AxisData { Name = "Z" }
+            }
+        };
+
+        showModal = true;
+    }
+
+    private void ShowEditModal(string? modelId = null)
+    {
+        string? idToEdit = modelId ?? selectedModelId;
+        if (string.IsNullOrEmpty(idToEdit)) return;
+
+        editMode = "edit";
+        modalTitle = "編輯機型";
+        modelNameError = false;
+
+        var originalModel = models.FirstOrDefault(m => m.Id == idToEdit);
+        if (originalModel != null)
+        {
+            editingModel = new ModelData
+            {
+                Id = originalModel.Id,
+                Name = originalModel.Name,
+                IsCollapsed = originalModel.IsCollapsed,
+                Axes = originalModel.Axes.Select(a => new AxisData
+                {
+                    Name = a.Name,
+                    EncoderJIS = a.EncoderJIS,
+                    EncoderVDI = a.EncoderVDI,
+                    EncoderJISRepeat = a.EncoderJISRepeat,
+                    EncoderVDIRepeat = a.EncoderVDIRepeat,
+                    OpticalJIS = a.OpticalJIS,
+                    OpticalVDI = a.OpticalVDI,
+                    OpticalJISRepeat = a.OpticalJISRepeat,
+                    OpticalVDIRepeat = a.OpticalVDIRepeat
+                }).ToList()
+            };
+
+            showModal = true;
+        }
+    }
+
+    private void ShowCopyModal(string? modelId = null)
+    {
+        string? idToCopy = modelId ?? selectedModelId;
+        if (string.IsNullOrEmpty(idToCopy)) return;
+
+        editMode = "copy";
+        modalTitle = "複製機型";
+        modelNameError = false;
+
+        var originalModel = models.FirstOrDefault(m => m.Id == idToCopy);
+        if (originalModel != null)
+        {
+            editingModel = new ModelData
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = originalModel.Name + " (複製)",
+                IsCollapsed = originalModel.IsCollapsed,
+                Axes = originalModel.Axes.Select(a => new AxisData
+                {
+                    Name = a.Name,
+                    EncoderJIS = a.EncoderJIS,
+                    EncoderVDI = a.EncoderVDI,
+                    EncoderJISRepeat = a.EncoderJISRepeat,
+                    EncoderVDIRepeat = a.EncoderVDIRepeat,
+                    OpticalJIS = a.OpticalJIS,
+                    OpticalVDI = a.OpticalVDI,
+                    OpticalJISRepeat = a.OpticalJISRepeat,
+                    OpticalVDIRepeat = a.OpticalVDIRepeat
+                }).ToList()
+            };
+
+            showModal = true;
+        }
+    }
+
+    private void SaveModel()
+    {
+        modelNameError = false;
+
+        if (string.IsNullOrWhiteSpace(editingModel.Name))
+        {
+            modelNameError = true;
+            return;
+        }
+
+        if (editMode == "create" || editMode == "copy")
+        {
+            models.Add(editingModel);
+        }
+        else if (editMode == "edit")
+        {
+            var index = models.FindIndex(m => m.Id == editingModel.Id);
+            if (index >= 0)
+            {
+                models[index] = editingModel;
+            }
+        }
+
+        FilterModels();
+        CloseModal();
+    }
+
+    private void ConfirmDeleteModel(string modelId)
+    {
+        modelToDelete = modelId;
+        showDeleteConfirm = true;
+    }
+
+    private void DeleteModel()
+    {
+        var model = models.FirstOrDefault(m => m.Id == modelToDelete);
+        if (model != null)
+        {
+            models.Remove(model);
+
+            // 如果刪除的是當前選擇的模型，清空選擇
+            if (selectedModelId == modelToDelete)
+            {
+                selectedModelId = "";
+            }
+
+            FilterModels();
+        }
+
+        showDeleteConfirm = false;
+        modelToDelete = "";
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteConfirm = false;
+        modelToDelete = "";
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        editingModel = new ModelData();
+        editMode = "";
+        modelNameError = false;
     }
 
     public class ModelData
@@ -284,9 +804,9 @@
         public bool IsCollapsed { get; set; }
         public List<AxisData> Axes { get; set; } = new();
     }
-
     public class AxisData
     {
+
         public string Name { get; set; } = "";
         public string EncoderJIS { get; set; } = "";
         public string EncoderVDI { get; set; } = "";
