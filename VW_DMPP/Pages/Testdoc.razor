@@ -1,0 +1,639 @@
+﻿@page "/testdoc"
+<PageTitle>檢驗表單</PageTitle>
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>品檢項目基本資料 - SF0669</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 20px;
+        }
+
+        .left-panel {
+            width: 350px;
+            flex-shrink: 0;
+        }
+
+        .right-panel {
+            flex: 1;
+        }
+
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        .header-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+
+        .progress-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .inspection-tree {
+            margin: 20px 0;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+
+        .tree-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 8px;
+        }
+
+        .tree-item {
+            margin-left: 20px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .tree-toggle {
+            display: inline-block;
+            width: 20px;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .tree-children {
+            margin-left: 20px;
+            display: none;
+        }
+
+            .tree-children.expanded {
+                display: block;
+            }
+
+        .status-icon {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .status-pass {
+            color: #28a745;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .status-fail {
+            color: #dc3545;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            color: #ffc107;
+            font-size: 16px;
+        }
+
+        .status-not-tested {
+            color: #6c757d;
+            font-size: 16px;
+        }
+
+        .inspection-detail {
+            margin-top: 30px;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .detail-header {
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .detail-table th, .detail-table td {
+                border: 1px solid #dee2e6;
+                padding: 12px;
+                text-align: left;
+            }
+
+            .detail-table th {
+                background: #f8f9fa;
+                font-weight: bold;
+            }
+
+        .test-method {
+            white-space: pre-line;
+            line-height: 1.8;
+        }
+
+        .button-group {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 8px 24px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-ok {
+            background: #28a745;
+            color: white;
+        }
+
+            .btn-ok:hover {
+                background: #218838;
+            }
+
+        .btn-ng {
+            background: #dc3545;
+            color: white;
+        }
+
+            .btn-ng:hover {
+                background: #c82333;
+            }
+
+        .personnel-info {
+            background: #fff3cd;
+            padding: 10px;
+        }
+
+        .personnel-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+            .personnel-row:last-child {
+                margin-bottom: 0;
+            }
+
+        .personnel-label {
+            font-weight: bold;
+            width: 100px;
+        }
+
+        .personnel-select {
+            padding: 5px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 150px;
+        }
+
+            .personnel-select:hover {
+                border-color: #007bff;
+            }
+
+        .image-placeholder {
+            background: #e9ecef;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>品檢項目基本資料</h1>
+
+        <div class="main-layout">
+            <div class="left-panel">
+                <div class="progress-info">
+                    <strong>完成率: 3/12 (25%)</strong>
+                </div>
+
+                <div class="inspection-tree">
+                    <div class="tree-title">品檢項目完成率</div>
+                    <div class="tree-item" style="margin-left: 0;">
+                        <span class="tree-toggle" onclick="toggleTree('precision')">▼</span>
+                        <span>精度檢驗</span>
+                        <div id="precision" class="tree-children expanded">
+                            <div class="tree-item">
+                                <span class="tree-toggle" onclick="toggleTree('geometry')">▼</span>
+                                <span>幾何精度檢驗</span>
+                                <div id="geometry" class="tree-children expanded">
+                                    <div class="tree-item" onclick="showDetail('item1')">
+                                        <span class="status-icon status-pass">✓</span>
+                                        工作台面之真直度 - XY面向 <span style="color:#28a745; font-weight: bold;">檢驗合格</span>
+                                    </div>
+                                    <div class="tree-item" onclick="showDetail('item2')">
+                                        <span class="status-icon status-pass">✓</span>
+                                        工作台面之真直度 - YZ面向 <span style="color: #28a745; font-weight: bold;">檢驗合格</span>
+                                    </div>
+                                    <div class="tree-item" onclick="showDetail('item3')">
+                                        <span class="status-icon status-pass">✓</span>
+                                        各軸方向相互運動之直角度 - XY面向 <span style="color:#28a745; font-weight: bold;">檢驗合格</span>
+                                    </div>
+                                    <div class="tree-item" onclick="showDetail('item4')">
+                                        <span class="status-icon status-fail">✗</span>
+                                        各軸方向相互運動之直角度 - YZ面向 <span style="color: #dc3545;">檢驗不合格</span>
+                                    </div>
+                                    <div class="tree-item" onclick="showDetail('item5')">
+                                        <span class="status-icon status-not-tested">--</span>
+                                        Y軸方向之運動與工作台面之平行度 <span style="color: #6c757d;">尚未檢驗</span>
+                                    </div>
+                                    <div class="tree-item" onclick="showDetail('item6')">
+                                        <span class="status-icon status-not-tested">--</span>
+                                        工作台X軸方向之運動與主軸之平行度 <span style="color: #6c757d;">尚未檢驗</span>
+                                    </div>
+                                    <div class="tree-item" onclick="showDetail('item7')">
+                                        <span class="status-icon status-not-tested">--</span>
+                                        主軸軸線之軸向竄動 <span style="color: #6c757d;">尚未檢驗</span>
+                                    </div>
+                                    <div class="tree-item" onclick="showDetail('item8')">
+                                        <span class="status-icon status-not-tested">--</span>
+                                        主軸軸線之徑向竄動 <span style="color: #6c757d;">尚未檢驗</span>
+                                    </div>
+                                </div>
+
+                                <div class="tree-item">
+                                    <span class="tree-toggle" onclick="toggleTree('geometry2')">▶</span>
+                                    <span>幾何精度檢驗2</span>
+                                    <div id="geometry2" class="tree-children">
+                                        <div class="tree-item" onclick="showDetail('item1')">
+                                            <span class="status-icon status-pass">✓</span>
+                                            工作台面之真直度 - XY面向 <span style="color:#28a745; font-weight: bold;">檢驗合格</span>
+                                        </div>
+                                        <div class="tree-item" onclick="showDetail('item2')">
+                                            <span class="status-icon status-pass">✓</span>
+                                            工作台面之真直度 - YZ面向 <span style="color: #28a745; font-weight: bold;">檢驗合格</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tree-item">
+                                    <span class="tree-toggle" onclick="toggleTree('geometry3')">▶</span>
+                                    <span>幾何精度檢驗3</span>
+                                    <div id="geometry3" class="tree-children">
+                                        <div class="tree-item" onclick="showDetail('item3')">
+                                            <span class="status-icon status-pass">✓</span>
+                                            各軸方向相互運動之直角度 - XY面向 <span style="color:#28a745; font-weight: bold;">檢驗合格</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="header-info">
+                    <strong>機號:</strong> SF0669 |
+                    <strong>檢驗類型:</strong> 精度檢驗 > 幾何精度檢驗 |
+                    <strong>版本:</strong> Ver1.1
+                </div>
+
+                <div id="detailContainer">
+                    <!-- 預設內容會被 JavaScript 替換 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+                const processPersonnelList = ['劉昭鴻', '陳蔚霖', '黃柏堯', '謝嘉育', '鄭佳貴', '劉冠佑', '王宜碩', '王旻琪', '李泓儀', '張政弘', '施瑞穎', '待指派'];
+                const finalPersonnelList = ['賴玉政', '黃柏堯', '待指派'];
+
+                // 隨機選擇製程擔當的函數
+                function getRandomProcessPersonnel() {
+                    const availablePersonnel = processPersonnelList.filter(p => p !== '待指派');
+                    return availablePersonnel[Math.floor(Math.random() * availablePersonnel.length)];
+                }
+
+                // 隨機選擇終檢擔當的函數
+                function getRandomFinalPersonnel() {
+                    const availablePersonnel = finalPersonnelList.filter(p => p !== '待指派');
+                    return availablePersonnel[Math.floor(Math.random() * availablePersonnel.length)];
+                }
+
+                                // 計算完成率的函數
+                        function calculateProgress() {
+                            const allItems = Object.values(inspectionData);
+                            const completedItems = allItems.filter(item => item.status === 'pass' || item.status === 'fail');
+                            const totalItems = allItems.length;
+                            const completedCount = completedItems.length;
+                            const percentage = Math.round((completedCount / totalItems) * 100);
+
+                            return {
+                                completed: completedCount,
+                                total: totalItems,
+                                percentage: percentage
+                            };
+                        }
+
+                        // 更新完成率顯示
+                        function updateProgressDisplay() {
+                            const progress = calculateProgress();
+                            const progressElement = document.querySelector('.progress-info strong');
+                            if (progressElement) {
+                                progressElement.textContent = `完成率: ${progress.completed}/${progress.total} (${progress.percentage}%)`;
+                            }
+                        }
+
+                        const inspectionData = {
+                    item1: {
+                        title: '工作台面之真直度 - XY面向',
+                        method: `1. 將工作台移至X軸行程中央。
+        2. 將主軸頭移至Y軸行程中央。
+        3. 放置精密水平儀在工作台中央，並且調整水平儀使其歸零。
+        4. 移動工作台(X軸向)至任至少中央及兩端3處之測定。
+        5. 讀數最大差即為測定值。`,
+                        note: '使用精密水平儀，精度需達0.002mm/1000mm',
+                        standard: `2000-3000: 0.03mm
+        3000-4000: 0.04mm
+        4000以上: 0.05mm`,
+                        result: `實測值: 0.025mm
+        行程: 2500mm`,
+                        personnel: { process: getRandomProcessPersonnel(), final: getRandomFinalPersonnel() },
+                        status: 'pass'
+                    },
+                    item2: {
+                        title: '工作台面之真直度 - YZ面向',
+                        method: `1. 將工作台移至Y軸行程中央。
+        2. 將主軸頭移至Z軸行程中央。
+        3. 放置精密水平儀在工作台中央，並且調整水平儀使其歸零。
+        4. 移動工作台(Y軸向)至任至少中央及兩端3處之測定。
+        5. 讀數最大差即為測定值。`,
+                        note: '測量時需確保工作台表面清潔',
+                        standard: `2000-3000: 0.03mm
+        3000-4000: 0.04mm
+        4000以上: 0.05mm`,
+                        result: `實測值: 0.028mm
+        行程: 2800mm`,
+                        personnel: { process: getRandomProcessPersonnel(), final: getRandomFinalPersonnel() },
+                        status: 'pass'
+                    },
+                    item3: {
+                        title: '各軸方向相互運動之直角度 - XY面向',
+                        method: `1. 將主軸頭移至Z軸行程中央。
+        2. 將工作台移至X軸及Y軸行程中央。
+        3. 將精密直角規固定於工作台面上。
+        4. 將量表座固定於主軸頭上，量表測頭接觸直角規Y軸方向量測面。
+        5. 移動工作台X軸方向，記錄量表讀數變化。`,
+                        note: '使用1級精密直角規',
+                        standard: `全行程: 0.02mm/500mm`,
+                        result: `實測值: 0.018mm
+        行程: 500mm`,
+                        personnel: { process: getRandomProcessPersonnel(), final: getRandomFinalPersonnel() },
+                        status: 'pass'
+                    },
+                    item4: {
+                        title: '各軸方向相互運動之直角度 - YZ面向',
+                        method: `1. 將主軸頭移至Z軸行程中央。
+        2. 將工作台移至Y軸行程中央。
+        3. 將精密直角規固定於工作台面上。
+        4. 將量表座固定於主軸頭上，量表測頭接觸直角規Z軸方向量測面。
+        5. 移動主軸頭Z軸方向，記錄量表讀數變化。`,
+                        note: '測量前需暖機30分鐘',
+                        standard: `全行程: 0.02mm/500mm`,
+                        result: `實測值: 0.025mm
+        行程: 500mm
+        備註: 超出允收標準`,
+                        personnel: { process: getRandomProcessPersonnel(), final: getRandomFinalPersonnel() },
+                        status: 'fail'
+                    },
+                    item5: {
+                        title: 'Y軸方向之運動與工作台面之平行度',
+                        method: `1. 將工作台移至Y軸行程中央。
+        2. 將量表座固定於主軸頭上。
+        3. 量表測頭接觸工作台面。
+        4. 移動工作台Y軸全行程，記錄量表讀數變化。`,
+                        note: '需在恆溫環境下進行測量',
+                        standard: `全行程: 0.03mm/1000mm`,
+                        result: `尚未進行檢驗`,
+                        personnel: { process: '待指派', final: '待指派' },
+                        status: 'not-tested'
+                    },
+                    item6: {
+                        title: '工作台X軸方向之運動與主軸之平行度',
+                        method: `1. 將標準測試棒安裝於主軸上。
+        2. 將量表座固定於工作台上。
+        3. 量表測頭接觸測試棒。
+        4. 移動工作台X軸全行程，記錄量表讀數變化。`,
+                        note: '測試棒需經過校正認證',
+                        standard: `全行程: 0.02mm/300mm`,
+                        result: `尚未進行檢驗`,
+                        personnel: { process: '待指派', final: '待指派' },
+                        status: 'not-tested'
+                    },
+                    item7: {
+                        title: '主軸軸線之軸向竄動',
+                        method: `1. 將標準測試棒安裝於主軸上。
+        2. 將量表座固定於工作台上。
+        3. 量表測頭接觸測試棒端面。
+        4. 主軸以工作轉速旋轉，記錄量表讀數變化。`,
+                        note: '測量時主軸轉速設定為額定轉速',
+                        standard: `最大值: 0.005mm`,
+                        result: `尚未進行檢驗`,
+                        personnel: { process: '待指派', final: '待指派' },
+                        status: 'not-tested'
+                    },
+                    item8: {
+                        title: '主軸軸線之徑向竄動',
+                        method: `1. 將標準測試棒安裝於主軸上。
+        2. 將量表座固定於工作台上。
+        3. 量表測頭接觸測試棒外徑。
+        4. 主軸以工作轉速旋轉，記錄量表讀數變化。`,
+                        note: '需在主軸前端及後端兩處測量',
+                        standard: `前端: 0.005mm
+        後端: 0.008mm`,
+                        result: `尚未進行檢驗`,
+                        personnel: { process: '待指派', final: '待指派' },
+                        status: 'not-tested'
+                    }
+                };
+
+                function toggleTree(id) {
+                    const element = document.getElementById(id);
+                    const toggle = event.target;
+                    if (element.classList.contains('expanded')) {
+                        element.classList.remove('expanded');
+                        toggle.textContent = '▶';
+                    } else {
+                        element.classList.add('expanded');
+                        toggle.textContent = '▼';
+                    }
+                }
+
+                function showDetail(itemId) {
+                    const data = inspectionData[itemId];
+                    const container = document.getElementById('detailContainer');
+
+                    let statusBadge = '';
+                    if (data.status === 'pass') {
+                        statusBadge = '<span style="color: #28a745; font-weight: bold; margin-left: 10px;">✓ 檢驗合格</span>';
+                    } else if (data.status === 'fail') {
+                        statusBadge = '<span style="color: #dc3545; font-weight: bold; margin-left: 10px;">✗ 檢驗不合格</span>';
+                    } else if (data.status === 'pending') {
+                        statusBadge = '<span style="color: #ffc107; font-weight: bold; margin-left: 10px;">⏳ 檢驗中</span>';
+                    } else {
+                        statusBadge = '<span style="color: #6c757d; font-weight: bold; margin-left: 10px;">-- 尚未檢驗</span>';
+                    }
+
+                    const processOptions = processPersonnelList.map(p =>
+                        `<option value="${p}" ${p === data.personnel.process ? 'selected' : ''}>${p}</option>`
+                    ).join('');
+
+                    const finalOptions = finalPersonnelList.map(p =>
+                        `<option value="${p}" ${p === data.personnel.final ? 'selected' : ''}>${p}</option>`
+                    ).join('');
+
+                    container.innerHTML = `
+                        <div class="inspection-detail">
+                            <div class="detail-header">
+                                檢驗項目: ${data.title}${statusBadge}
+                            </div>
+                            <table class="detail-table">
+                                <tr>
+                                    <th style="width: 40%;">測試方法</th>
+                                    <th style="width: 40%;">特殊說明</th>
+                                    <th style="width: 20%;">檢驗輔助圖示</th>
+                                </tr>
+                                <tr>
+                                    <td class="test-method" rowspan="2">${data.method}</td>
+                                    <td rowspan="2">${data.note}</td>
+                                    <td style="text-align: center;">
+                                        <div class="image-placeholder">
+                                            圖示區域
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="personnel-info">
+                                        <div class="personnel-row">
+                                            <span class="personnel-label">製程擔當:</span>
+                                            <select class="personnel-select" onchange="updatePersonnel('${itemId}', 'process', this.value)">
+                                                ${processOptions}
+                                            </select>
+                                        </div>
+                                        <div class="personnel-row">
+                                            <span class="personnel-label">終檢擔當:</span>
+                                            <select class="personnel-select" onchange="updatePersonnel('${itemId}', 'final', this.value)">
+                                                ${finalOptions}
+                                            </select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th style="width: 33%;">允收標準</th>
+                                    <th style="width: 33%;">檢驗結果</th>
+                                    <th style="width: 34%;">判定結果</th>
+                                </tr>
+                                <tr>
+                                    <td style="white-space: pre-line;">${data.standard}</td>
+                                    <td style="white-space: pre-line;">${data.result}</td>
+                                    <td>
+                                        <div class="button-group">
+                                            <button class="btn btn-ok" onclick="setResult('${itemId}', 'OK')">OK</button>
+                                            <button class="btn btn-ng" onclick="setResult('${itemId}', 'NG')">NG</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    `;
+                }
+
+                function updatePersonnel(itemId, type, value) {
+                    inspectionData[itemId].personnel[type] = value;
+                    console.log(`已更新${type === 'process' ? '製程擔當' : '終檢擔當'}為: ${value}`);
+                }
+
+                function setResult(itemId, result) {
+                    if (result === 'OK') {
+                        inspectionData[itemId].status = 'pass';
+                    } else {
+                        inspectionData[itemId].status = 'fail';
+                    }
+
+                    updateTreeItem(itemId);
+                    showDetail(itemId);
+                }
+
+                function updateTreeItem(itemId) {
+                    const data = inspectionData[itemId];
+                    const treeItems = document.querySelectorAll(`[onclick="showDetail('${itemId}')"]`);
+
+                    treeItems.forEach(treeItem => {
+                        let statusIcon = '';
+                        let statusText = '';
+
+                        if (data.status === 'pass') {
+                            statusIcon = '<span class="status-icon status-pass">✓</span>';
+                            statusText = '<span style="color: #28a745; font-weight: bold;">檢驗合格</span>';
+                        } else if (data.status === 'fail') {
+                            statusIcon = '<span class="status-icon status-fail">✗</span>';
+                            statusText = '<span style="color: #dc3545; font-weight: bold;">檢驗不合格</span>';
+                        } else if (data.status === 'pending') {
+                            statusIcon = '<span class="status-icon status-pending">⏳</span>';
+                            statusText = '<span style="color: #ffc107; font-weight: bold;">檢驗中</span>';
+                        } else {
+                            statusIcon = '<span class="status-icon status-not-tested">--</span>';
+                            statusText = '<span style="color: #6c757d;">尚未檢驗</span>';
+                        }
+
+                        treeItem.innerHTML = `${statusIcon} ${data.title} ${statusText}`;
+                    });
+                }
+
+                // 頁面載入後自動顯示第一個項目
+                window.addEventListener('load', function() {
+                    setTimeout(function() {
+                        showDetail('item1');
+                    }, 200);
+                });
+    </script>
+</body>
+</html>
+
+@code {
+
+}

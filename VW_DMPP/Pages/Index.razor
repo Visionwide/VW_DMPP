@@ -1,0 +1,382 @@
+﻿@page "/"
+@using VW_DMPP
+@using System.Data.SqlClient
+
+@using System.Collections.Generic
+@using System.ComponentModel.DataAnnotations
+@using System.Linq
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>品檢項目檢測狀態 - SF0669</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        .info-header {
+            background-color: #eef2f7;
+            border: 1px solid #ccd3db;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+        }
+
+            .info-header p {
+                margin: 4px 0;
+                font-size: 16px;
+                font-weight: 500;
+                color: #333;
+            }
+
+        /* 區段標題列 */
+        .section-header {
+            background-color: #ddd;
+            font-weight: bold;
+            padding: 8px 12px;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid #999;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .section-header .rate {
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .section-header:hover {
+                background-color: #ccc;
+            }
+
+        .toggle-icon {
+            width: 20px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .detail-section {
+            display: none;
+            margin-top: 10px;
+        }
+
+            .detail-section.active {
+                display: block;
+            }
+
+        /* 表格樣式 */
+        .inspection-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #333;
+            margin-bottom: 10px;
+        }
+
+            .inspection-table th,
+            .inspection-table td {
+                border: 1px solid #333;
+                padding: 8px;
+                text-align: center;
+            }
+
+        .status-pass {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-fail {
+            color: red;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            color: #999;
+            font-weight: bold;
+        }
+
+        /* 讓表格內容可滾動，表頭固定 */
+        .scrollable-table {
+            max-height: 400px;
+            overflow-y: auto;
+            display: block;
+            border-top: none;
+        }
+
+            .scrollable-table table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            /* 固定表頭 */
+            .scrollable-table thead th {
+                position: sticky;
+                top: 0;
+                background-color: #f0f0f0;
+                z-index: 2;
+            }
+    </style>
+</head>
+<body>
+    <h1>品檢項目完成率與檢測結果</h1>
+    <div class="container">
+        <div class="info-header">
+            <p>機號: <strong>SF0669</strong>　|　檢驗類型: <strong>精度檢驗</strong>　|　合約交期: <strong>2021/02/20</strong>　|　排程日期: <strong>2021/01/26</strong></p>
+        </div>
+
+        <!-- ▼ 幾何精度檢驗 -->
+        <div class="section-header" onclick="toggleSection('geo')">
+            <span><span class="toggle-icon" id="icon-geo">▼</span> 幾何精度檢驗</span>
+            <span class="rate" id="rate-geo">完成率：0/0</span>
+        </div>
+        <div class="detail-section active" id="geo">
+            <div class="scrollable-table">
+                <table class="inspection-table">
+                    <thead>
+                        <tr>
+                            <th>檢驗項目</th>
+                            <th>狀態</th>
+                            <th>檢驗結果</th>
+                            <th>檢驗日期</th>
+                            <th>檢驗人員</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>工作台面之真直度 - XY面向</td>
+                            <td>已檢測</td>
+                            <td class="status-pass">通過</td>
+                            <td>2025/05/12</td>
+                            <td>賴玉政</td>
+                        </tr>
+                        <tr>
+                            <td>工作台面之真直度 - YZ面向</td>
+                            <td>已檢測</td>
+                            <td class="status-pass">通過</td>
+                            <td>2025/05/18</td>
+                            <td>劉昭鴻</td>
+                        </tr>
+                        <tr>
+                            <td>各軸方向相互運動之直角度 - XZ面向</td>
+                            <td>已檢測</td>
+                            <td class="status-pass">通過</td>
+                            <td>2025/06/05</td>
+                            <td>陳蔚霖</td>
+                        </tr>
+                        <tr>
+                            <td>各軸方向相互運動之直角度 - YZ面向</td>
+                            <td>已檢測</td>
+                            <td class="status-fail">未通過</td>
+                            <td>2025/06/22</td>
+                            <td>黃柏堯</td>
+                        </tr>
+                        <tr>
+                            <td>各軸方向相互運動之直角度 - XY面向</td>
+                            <td>已檢測</td>
+                            <td class="status-pass">通過</td>
+                            <td>2025/07/08</td>
+                            <td>謝嘉育</td>
+                        </tr>
+                        <tr>
+                            <td>Y軸方向之運動與工作台面之平行度</td>
+                            <td>已檢測</td>
+                            <td class="status-fail">未通過</td>
+                            <td>2025/07/25</td>
+                            <td>鄭佳貴</td>
+                        </tr>
+                        <tr>
+                            <td>工作台X軸方向之運動與主軸之平行度</td>
+                            <td>已檢測</td>
+                            <td class="status-pass">通過</td>
+                            <td>2025/08/14</td>
+                            <td>劉冠佑</td>
+                        </tr>
+                        <tr>
+                            <td>主軸鍵孔內之偏擺</td>
+                            <td>已檢測</td>
+                            <td class="status-pass">通過</td>
+                            <td>2025/09/03</td>
+                            <td>王宜碩</td>
+                        </tr>
+                        <tr>
+                            <td>工作台Z軸方向之運動與主軸之垂直度</td>
+                            <td>已檢測</td>
+                            <td class="status-pass">通過</td>
+                            <td>2025/09/18</td>
+                            <td>王旻琪</td>
+                        </tr>
+                        <tr>
+                            <td>主軸旋轉軸線之徑向偏擺</td>
+                            <td>尚未檢測</td>
+                            <td class="status-pending">尚未檢驗</td>
+                            <td>2025/10/05</td>
+                            <td>李泓儀</td>
+                        </tr>
+                        <tr>
+                            <td>主軸旋轉軸線之軸向偏擺</td>
+                            <td>尚未檢測</td>
+                            <td class="status-pending">尚未檢驗</td>
+                            <td>2025/10/15</td>
+                            <td>張政弘</td>
+                        </tr>
+                        <tr>
+                            <td>迴轉工作台面之偏擺</td>
+                            <td>尚未檢測</td>
+                            <td class="status-pending">尚未檢驗</td>
+                            <td>2025/10/28</td>
+                            <td>施瑞穎</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ▼ 定位精度檢驗 -->
+        <div class="section-header" onclick="toggleSection('pos')">
+            <span><span class="toggle-icon" id="icon-pos">►</span> 定位精度檢驗</span>
+            <span class="rate" id="rate-pos">完成率：0/0</span>
+        </div>
+        <div class="detail-section" id="pos">
+            <div class="scrollable-table">
+                <table class="inspection-table">
+                    <thead>
+                        <tr>
+                            <th>檢驗項目</th>
+                            <th>狀態</th>
+                            <th>檢驗結果</th>
+                            <th>檢驗日期</th>
+                            <th>檢驗人員</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>X軸定位精度</td>
+                            <td>已檢測</td>
+                            <td class="status-pass">通過</td>
+                            <td>2025/04/28</td>
+                            <td>賴玉政</td>
+                        </tr>
+                        <tr>
+                            <td>Y軸定位精度</td>
+                            <td>已檢測</td>
+                            <td class="status-pass">通過</td>
+                            <td>2025/06/16</td>
+                            <td>劉昭鴻</td>
+                        </tr>
+                        <tr>
+                            <td>Z軸定位精度</td>
+                            <td>已檢測</td>
+                            <td class="status-fail">未通過</td>
+                            <td>2025/08/20</td>
+                            <td>陳蔚霖</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ▼ 重複定位精度檢驗 -->
+        <div class="section-header" onclick="toggleSection('repeat')">
+            <span><span class="toggle-icon" id="icon-repeat">►</span> 重複定位精度檢驗</span>
+            <span class="rate" id="rate-repeat">完成率：0/0</span>
+        </div>
+        <div class="detail-section" id="repeat">
+            <div class="scrollable-table">
+                <table class="inspection-table">
+                    <thead>
+                        <tr>
+                            <th>檢驗項目</th>
+                            <th>狀態</th>
+                            <th>檢驗結果</th>
+                            <th>檢驗日期</th>
+                            <th>檢驗人員</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>X軸重複定位精度</td>
+                            <td>已檢測</td>
+                            <td class="status-pass">通過</td>
+                            <td>2025/05/22</td>
+                            <td>黃柏堯</td>
+                        </tr>
+                        <tr>
+                            <td>Y軸重複定位精度</td>
+                            <td>已檢測</td>
+                            <td class="status-pass">通過</td>
+                            <td>2025/07/11</td>
+                            <td>謝嘉育</td>
+                        </tr>
+                        <tr>
+                            <td>Z軸重複定位精度</td>
+                            <td>已檢測</td>
+                            <td class="status-fail">未通過</td>
+                            <td>2025/09/26</td>
+                            <td>鄭佳貴</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 展開/收合區塊
+        function toggleSection(id) {
+          const section = document.getElementById(id);
+          const icon = document.getElementById("icon-" + id);
+          const isActive = section.classList.toggle("active");
+          icon.textContent = isActive ? "▼" : "►";
+        }
+
+        // 計算完成率
+        function updateCompletionRates() {
+          document.querySelectorAll(".detail-section").forEach((section) => {
+            const rows = section.querySelectorAll("tbody tr");
+            let total = rows.length;
+            let done = 0;
+            rows.forEach((row) => {
+              const status = row.querySelector("td:nth-child(3)").textContent.trim();
+              if (status === "通過") done++;
+            });
+            const rateId = "rate-" + section.id;
+            const rateSpan = document.getElementById(rateId);
+            if (rateSpan) {
+              rateSpan.textContent = `完成率：${done}/${total}`;
+            }
+          });
+        }
+
+        document.addEventListener("DOMContentLoaded", updateCompletionRates);
+    </script>
+</body>
+</html>
+
+@code {
+
+}

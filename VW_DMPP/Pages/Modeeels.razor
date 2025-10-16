@@ -1,0 +1,331 @@
+﻿@page "/modeeels"
+
+<PageTitle>機型檢驗標準數值 - SF-2112</PageTitle>
+
+<div class="container">
+    <div class="controls">
+        <p>b. 可新增、編輯、複製</p>
+        <p>標準模組: <strong>SF系列定位及重複精度</strong></p>
+        <button class="btn-control" onclick="alert('新增模組功能')">新增模組</button>
+        <button class="btn-control" onclick="alert('複製模組功能')">複製模組</button>
+    </div>
+
+    <h2>機型檢驗標準數值</h2>
+
+    @foreach (var model in models)
+    {
+        <div class="table-title @(model.IsCollapsed ? "collapsed" : "")" @onclick="() => ToggleTable(model.Id)">
+            <span class="arrow">▼</span>
+            <span>機型: <strong>@model.Name</strong></span>
+        </div>
+        <div class="table-content @(model.IsCollapsed ? "collapsed" : "")">
+            <div class="table-wrapper">
+                <table class="inspection-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width: 8%;">軸向</th>
+                            <th colspan="4">編碼器</th>
+                            <th colspan="4">光學尺</th>
+                        </tr>
+                        <tr>
+                            <th>JIS-B6333<br>定位精度mm</th>
+                            <th>VDI 3441<br>定位精度mm</th>
+                            <th>JIS-B6333<br>重複精度mm</th>
+                            <th>VDI 3441<br>重複精度mm</th>
+                            <th>JIS-B6333<br>定位精度mm</th>
+                            <th>VDI 3441<br>定位精度mm</th>
+                            <th>JIS-B6333<br>重複精度mm</th>
+                            <th>VDI 3441<br>重複精度mm</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var axis in model.Axes)
+                        {
+                            <tr>
+                                <td>@axis.Name</td>
+                                <td>@axis.EncoderJIS</td>
+                                <td>@axis.EncoderVDI</td>
+                                <td>@axis.EncoderJISRepeat</td>
+                                <td>@axis.EncoderVDIRepeat</td>
+                                <td>@axis.OpticalJIS</td>
+                                <td>@axis.OpticalVDI</td>
+                                <td>@axis.OpticalJISRepeat</td>
+                                <td>@axis.OpticalVDIRepeat</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .controls {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+    }
+
+        .controls p {
+            margin: 5px 0;
+        }
+
+    .btn-control {
+        padding: 8px 16px;
+        margin-right: 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+
+        .btn-control:hover {
+            background-color: #45a049;
+        }
+
+    .table-wrapper {
+        overflow-x: auto;
+        margin: 20px 0;
+    }
+
+    .inspection-table {
+        width: 100%;
+        min-width: 800px;
+        border-collapse: collapse;
+        table-layout: auto;
+    }
+
+        .inspection-table, .inspection-table th, .inspection-table td {
+            border: 1px solid #333;
+        }
+
+            .inspection-table th, .inspection-table td {
+                padding: 10px;
+                text-align: center;
+                font-size: 14px;
+            }
+
+            .inspection-table thead th {
+                background-color: #2c3e50;
+                color: white;
+                font-weight: bold;
+            }
+
+            .inspection-table tbody td:first-child {
+                font-weight: bold;
+                background-color: #ecf0f1;
+            }
+
+    .table-title {
+        background-color: #d0d0d0;
+        color: #333;
+        font-weight: bold;
+        padding: 12px;
+        margin: 20px 0 10px 0;
+        border-radius: 0;
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+        transition: background-color 0.3s;
+        border: 1px solid #999;
+    }
+
+        .table-title:hover {
+            background-color: #c0c0c0;
+        }
+
+        .table-title .arrow {
+            transition: transform 0.3s;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .table-title.collapsed .arrow {
+            transform: rotate(-90deg);
+        }
+
+    .table-content {
+        max-height: 1000px;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out, opacity 0.3s ease-out;
+        opacity: 1;
+    }
+
+        .table-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+
+    h2 {
+        color: #2c3e50;
+        border-bottom: 3px solid #3498db;
+        padding-bottom: 10px;
+    }
+
+    @@media (max-width: 768px) {
+        .container {
+            padding: 10px;
+        }
+
+        .inspection-table th, .inspection-table td {
+            padding: 6px;
+            font-size: 12px;
+        }
+
+        .btn-control {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+    }
+</style>
+
+@code {
+    private List<ModelData> models = new();
+
+    protected override void OnInitialized()
+    {
+        InitializeModels();
+    }
+
+    private void InitializeModels()
+    {
+        models = new List<ModelData>
+        {
+            new ModelData
+            {
+                Id = "sf2112",
+                Name = "SF-2112",
+                IsCollapsed = false,
+                Axes = new List<AxisData>
+                {
+                    new AxisData { Name = "X", EncoderJIS = "±0.010/全行程", EncoderVDI = "P 0.015", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.010", OpticalJIS = "±0.008/全行程", OpticalVDI = "P 0.010", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.008" },
+                    new AxisData { Name = "Y", EncoderJIS = "±0.010/全行程", EncoderVDI = "P 0.018", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.015", OpticalJIS = "±0.008/全行程", OpticalVDI = "P 0.016", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.012" },
+                    new AxisData { Name = "Z", EncoderJIS = "±0.010/全行程", EncoderVDI = "P 0.012", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.010", OpticalJIS = "±0.008/全行程", OpticalVDI = "P 0.010", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.008" }
+                }
+            },
+            new ModelData
+            {
+                Id = "sf2612",
+                Name = "SF-2612",
+                IsCollapsed = true,
+                Axes = new List<AxisData>
+                {
+                    new AxisData { Name = "X", EncoderJIS = "±0.012/全行程", EncoderVDI = "P 0.018", EncoderJISRepeat = "±0.004", EncoderVDIRepeat = "PS 0.012", OpticalJIS = "±0.009/全行程", OpticalVDI = "P 0.012", OpticalJISRepeat = "±0.003", OpticalVDIRepeat = "PS 0.009" },
+                    new AxisData { Name = "Y", EncoderJIS = "±0.012/全行程", EncoderVDI = "P 0.020", EncoderJISRepeat = "±0.004", EncoderVDIRepeat = "PS 0.018", OpticalJIS = "±0.009/全行程", OpticalVDI = "P 0.018", OpticalJISRepeat = "±0.003", OpticalVDIRepeat = "PS 0.014" },
+                    new AxisData { Name = "Z", EncoderJIS = "±0.012/全行程", EncoderVDI = "P 0.014", EncoderJISRepeat = "±0.004", EncoderVDIRepeat = "PS 0.012", OpticalJIS = "±0.009/全行程", OpticalVDI = "P 0.012", OpticalJISRepeat = "±0.003", OpticalVDIRepeat = "PS 0.009" }
+                }
+            },
+            new ModelData
+            {
+                Id = "sf2116",
+                Name = "SF-2116",
+                IsCollapsed = true,
+                Axes = new List<AxisData>
+                {
+                    new AxisData { Name = "X", EncoderJIS = "±0.010/全行程", EncoderVDI = "P 0.015", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.010", OpticalJIS = "±0.008/全行程", OpticalVDI = "P 0.010", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.008" },
+                    new AxisData { Name = "Y", EncoderJIS = "±0.010/全行程", EncoderVDI = "P 0.018", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.015", OpticalJIS = "±0.008/全行程", OpticalVDI = "P 0.016", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.012" },
+                    new AxisData { Name = "Z", EncoderJIS = "±0.012/全行程", EncoderVDI = "P 0.016", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.012", OpticalJIS = "±0.009/全行程", OpticalVDI = "P 0.014", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.010" }
+                }
+            },
+            new ModelData
+            {
+                Id = "sf3112",
+                Name = "SF-3112",
+                IsCollapsed = true,
+                Axes = new List<AxisData>
+                {
+                    new AxisData { Name = "X", EncoderJIS = "±0.011/全行程", EncoderVDI = "P 0.016", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.011", OpticalJIS = "±0.009/全行程", OpticalVDI = "P 0.011", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.009" },
+                    new AxisData { Name = "Y", EncoderJIS = "±0.011/全行程", EncoderVDI = "P 0.019", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.016", OpticalJIS = "±0.009/全行程", OpticalVDI = "P 0.017", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.013" },
+                    new AxisData { Name = "Z", EncoderJIS = "±0.011/全行程", EncoderVDI = "P 0.013", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.011", OpticalJIS = "±0.009/全行程", OpticalVDI = "P 0.011", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.009" }
+                }
+            },
+            new ModelData
+            {
+                Id = "sf2616",
+                Name = "SF-2616",
+                IsCollapsed = true,
+                Axes = new List<AxisData>
+                {
+                    new AxisData { Name = "X", EncoderJIS = "±0.012/全行程", EncoderVDI = "P 0.018", EncoderJISRepeat = "±0.004", EncoderVDIRepeat = "PS 0.012", OpticalJIS = "±0.009/全行程", OpticalVDI = "P 0.012", OpticalJISRepeat = "±0.003", OpticalVDIRepeat = "PS 0.009" },
+                    new AxisData { Name = "Y", EncoderJIS = "±0.012/全行程", EncoderVDI = "P 0.020", EncoderJISRepeat = "±0.004", EncoderVDIRepeat = "PS 0.018", OpticalJIS = "±0.009/全行程", OpticalVDI = "P 0.018", OpticalJISRepeat = "±0.003", OpticalVDIRepeat = "PS 0.014" },
+                    new AxisData { Name = "Z", EncoderJIS = "±0.014/全行程", EncoderVDI = "P 0.018", EncoderJISRepeat = "±0.004", EncoderVDIRepeat = "PS 0.014", OpticalJIS = "±0.010/全行程", OpticalVDI = "P 0.016", OpticalJISRepeat = "±0.003", OpticalVDIRepeat = "PS 0.011" }
+                }
+            },
+            new ModelData
+            {
+                Id = "sf4112",
+                Name = "SF-4112",
+                IsCollapsed = true,
+                Axes = new List<AxisData>
+                {
+                    new AxisData { Name = "X", EncoderJIS = "±0.013/全行程", EncoderVDI = "P 0.019", EncoderJISRepeat = "±0.004", EncoderVDIRepeat = "PS 0.013", OpticalJIS = "±0.010/全行程", OpticalVDI = "P 0.013", OpticalJISRepeat = "±0.003", OpticalVDIRepeat = "PS 0.010" },
+                    new AxisData { Name = "Y", EncoderJIS = "±0.013/全行程", EncoderVDI = "P 0.021", EncoderJISRepeat = "±0.004", EncoderVDIRepeat = "PS 0.019", OpticalJIS = "±0.010/全行程", OpticalVDI = "P 0.019", OpticalJISRepeat = "±0.003", OpticalVDIRepeat = "PS 0.015" },
+                    new AxisData { Name = "Z", EncoderJIS = "±0.013/全行程", EncoderVDI = "P 0.015", EncoderJISRepeat = "±0.004", EncoderVDIRepeat = "PS 0.013", OpticalJIS = "±0.010/全行程", OpticalVDI = "P 0.013", OpticalJISRepeat = "±0.003", OpticalVDIRepeat = "PS 0.010" }
+                }
+            },
+            new ModelData
+            {
+                Id = "sf3116",
+                Name = "SF-3116",
+                IsCollapsed = true,
+                Axes = new List<AxisData>
+                {
+                    new AxisData { Name = "X", EncoderJIS = "±0.011/全行程", EncoderVDI = "P 0.016", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.011", OpticalJIS = "±0.009/全行程", OpticalVDI = "P 0.011", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.009" },
+                    new AxisData { Name = "Y", EncoderJIS = "±0.011/全行程", EncoderVDI = "P 0.019", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.016", OpticalJIS = "±0.009/全行程", OpticalVDI = "P 0.017", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.013" },
+                    new AxisData { Name = "Z", EncoderJIS = "±0.013/全行程", EncoderVDI = "P 0.017", EncoderJISRepeat = "±0.003", EncoderVDIRepeat = "PS 0.013", OpticalJIS = "±0.010/全行程", OpticalVDI = "P 0.015", OpticalJISRepeat = "±0.002", OpticalVDIRepeat = "PS 0.011" }
+                }
+            }
+        };
+    }
+
+    private void ToggleTable(string modelId)
+    {
+        var model = models.FirstOrDefault(m => m.Id == modelId);
+        if (model != null)
+        {
+            model.IsCollapsed = !model.IsCollapsed;
+        }
+    }
+
+    public class ModelData
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public bool IsCollapsed { get; set; }
+        public List<AxisData> Axes { get; set; } = new();
+    }
+
+    public class AxisData
+    {
+        public string Name { get; set; } = "";
+        public string EncoderJIS { get; set; } = "";
+        public string EncoderVDI { get; set; } = "";
+        public string EncoderJISRepeat { get; set; } = "";
+        public string EncoderVDIRepeat { get; set; } = "";
+        public string OpticalJIS { get; set; } = "";
+        public string OpticalVDI { get; set; } = "";
+        public string OpticalJISRepeat { get; set; } = "";
+        public string OpticalVDIRepeat { get; set; } = "";
+    }
+}
