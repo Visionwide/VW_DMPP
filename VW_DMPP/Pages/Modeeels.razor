@@ -1,14 +1,13 @@
 ﻿@page "/modeeels"
 @inject IJSRuntime JSRuntime
 
-<PageTitle>機型檢驗標準數值 - SF-2112</PageTitle>
+<PageTitle>機型檢驗標準數值</PageTitle>
 
 <!-- ✨ 新增: 儲存提示 -->
 <div class="save-indicator" id="saveIndicator">✓ 已自動保存</div>
 
 <div class="container">
     <div class="controls">
-        <p>b. 可新增、編輯、複製</p>
         <p>標準模組: <strong>SF系列定位及重複精度</strong></p>
         <div class="action-buttons">
             <button class="btn-control" @onclick="ShowCreateModal">新增模組</button>
