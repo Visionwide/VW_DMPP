@@ -5,6 +5,16 @@
 @inject IJSRuntime JSRuntime
 
 <PageTitle>機台紀錄列表</PageTitle>
+<script>
+    window.downloadFile = (fileName, base64Data) => {
+        const link = document.createElement('a');
+        link.href = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + base64Data;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+</script>
 
 <div class="container">
     <h3>機台紀錄列表</h3>
@@ -301,19 +311,34 @@
         }
     }
 
-    private void SaveData()
+    private async Task SaveData()
     {
         try
         {
-            YyscService.SaveData(dataList);
-            successMessage = "資料已成功儲存至 Excel";
+            // 讀取檔案內容
+            string sourcePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "data", "yysc.xlsx");
+
+            if (!File.Exists(sourcePath))
+            {
+                errorMessage = "來源 Excel 檔案不存在";
+                return;
+            }
+
+            byte[] fileBytes = await File.ReadAllBytesAsync(sourcePath);
+            string fileName = $"yysc_export_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            // 觸發檔案下載
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(fileBytes));
+
+            successMessage = "Excel 檔案下載已開始";
             errorMessage = null;
         }
         catch (Exception ex)
         {
-            errorMessage = $"儲存資料失敗: {ex.Message}";
+            errorMessage = $"輸出 Excel 失敗: {ex.Message}";
         }
     }
+
 
     // 🌟 修正: 初始化所有欄位為預設值
     private void AddNew()
